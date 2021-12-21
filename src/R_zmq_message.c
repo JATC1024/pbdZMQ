@@ -45,11 +45,13 @@ SEXP R_zmq_msg_send(SEXP R_rmsg, SEXP R_socket, SEXP R_flags){
 	int C_ret = -1, C_errno, C_flags = INTEGER(R_flags)[0];
 	void *C_socket = R_ExternalPtrAddr(R_socket);
 	zmq_msg_t msg;
+	int res;
 
 	if(C_socket != NULL){
 		C_ret = zmq_msg_init_size(&msg, C_rmsg_length);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_init_size errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}
@@ -58,13 +60,16 @@ SEXP R_zmq_msg_send(SEXP R_rmsg, SEXP R_socket, SEXP R_flags){
 		C_ret = zmq_msg_send(&msg, C_socket, C_flags);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_send errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}
+		res = C_ret;
 
 		C_ret = zmq_msg_close(&msg);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_close errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}
@@ -72,7 +77,7 @@ SEXP R_zmq_msg_send(SEXP R_rmsg, SEXP R_socket, SEXP R_flags){
 		warning("R_zmq_send: C_socket is not available.\n");
 	}
 
-	return(R_NilValue);
+	return AsInt(res);
 } /* End of R_zmq_msg_send(). */
 
 SEXP R_zmq_msg_recv(SEXP R_socket, SEXP R_flags){
@@ -86,6 +91,7 @@ SEXP R_zmq_msg_recv(SEXP R_socket, SEXP R_flags){
 		C_ret = zmq_msg_init(&msg);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_init errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}
@@ -93,6 +99,7 @@ SEXP R_zmq_msg_recv(SEXP R_socket, SEXP R_flags){
 		C_ret = zmq_msg_recv(&msg, C_socket, C_flags);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_recv errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}
@@ -103,6 +110,7 @@ SEXP R_zmq_msg_recv(SEXP R_socket, SEXP R_flags){
 		C_ret = zmq_msg_close(&msg);
 		if(C_ret == -1){
 			C_errno = zmq_errno();
+			return AsInt(-C_errno);
 			Rprintf("R_zmq_msg_close errno: %d strerror: %s\n",
 				C_errno, zmq_strerror(C_errno));
 		}

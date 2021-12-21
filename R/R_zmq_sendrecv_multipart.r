@@ -86,16 +86,17 @@ zmq.send.multipart <- function(socket, parts, serialize = TRUE){
 
 #' @rdname b2_sendrecv_multipart
 #' @export
-zmq.recv.multipart <- function(socket, unserialize = TRUE){
+zmq.recv.multipart <- function(socket, flags=.pbd_env$ZMQ.SR$BLOCK, unserialize = TRUE){
   ret <- list() 
   i.part <- 1
-  ret[[i.part]] <- zmq.msg.recv(socket, flags = .pbd_env$ZMQ.SR$BLOCK,
-                                unserialize = unserialize)
+  ret[[i.part]] <- zmq.msg.recv(socket, flags = flags, unserialize = unserialize)
+  if (is.numeric(ret[[1]]) && ret[[1]] < 0)
+      return(ret[[1]])
   opt.val <- zmq.getsockopt(socket, .pbd_env$ZMQ.SO$RCVMORE, 0L)
 
   while(opt.val == 1){
     i.part <- i.part + 1
-    ret[[i.part]] <- zmq.msg.recv(socket, flags = .pbd_env$ZMQ.SR$BLOCK,
+    ret[[i.part]] <- zmq.msg.recv(socket, flags = flags,
                                   unserialize = unserialize)
     opt.val <- zmq.getsockopt(socket, .pbd_env$ZMQ.SO$RCVMORE, 0L)
   }
